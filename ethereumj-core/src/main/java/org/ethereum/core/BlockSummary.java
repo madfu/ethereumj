@@ -17,6 +17,7 @@
  */
 package org.ethereum.core;
 
+import org.ethereum.util.ByteUtil;
 import org.ethereum.util.RLP;
 import org.ethereum.util.RLPElement;
 import org.ethereum.util.RLPList;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.ethereum.util.ByteUtil.toHexString;
 
 public class BlockSummary {
@@ -99,6 +99,16 @@ public class BlockSummary {
         );
     }
 
+    /**
+     * Whether this block could be new best block
+     * for the chain with provided old total difficulty
+     * @param oldTotDifficulty Total difficulty for the suggested chain
+     * @return True - best, False - not best
+     */
+    public boolean betterThan(BigInteger oldTotDifficulty) {
+        return getTotalDifficulty().compareTo(oldTotDifficulty) > 0;
+    }
+
     private static <T> byte[] encodeList(List<T> entries, Function<T, byte[]> encoder) {
         byte[][] result = new byte[entries.size()][];
         for (int i = 0; i < entries.size(); i++) {
@@ -164,7 +174,7 @@ public class BlockSummary {
 
     private static Map<byte[], BigInteger> decodeRewards(RLPList rewards) {
         return decodeMap(rewards, bytes -> bytes, bytes ->
-                isEmpty(bytes) ? BigInteger.ZERO : new BigInteger(1, bytes)
+                ByteUtil.bytesToBigInteger(bytes)
         );
     }
 }
